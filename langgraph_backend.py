@@ -20,7 +20,7 @@ class ChatState(TypedDict):
 def chat_node(state: ChatState):
     message=state['messages']
     response=llm.invoke(message).content
-    return {'messages':[response]}
+    return {"messages":[response]}
 
 # checkpointer
 checkpointer=MemorySaver()
@@ -42,3 +42,11 @@ graph.add_edge('chat_node',END)
 
 Chatbot=graph.compile(checkpointer=checkpointer)
 
+for message_chunk,metadata in Chatbot.stream(
+    {'messages': HumanMessage(content='what is the recepie for pasta')},
+    config={'configurable':{'thread_id':'thread-1'}},
+    stream_mode='messages',
+):
+    if message_chunk.content:
+        print(message_chunk.content, end=' ',flush=True)
+    
